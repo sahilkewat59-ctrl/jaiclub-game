@@ -1,1 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JaiClub - WinGo Live API</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background: #1a1b2f; color: #fff; padding-bottom: 120px; }
+        .header { background: #222342; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2e305c; }
+        .logo-box { font-size: 20px; font-weight: 900; color: #3ba0ff; letter-spacing: 1px; }
+        .logo-box span { color: #ff5274; }
+        .wallet-card { background: linear-gradient(135deg, #2b2c5c, #1e1f40); margin: 12px; padding: 18px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .wallet-title { font-size: 13px; color: #a2a4cb; text-align: center; }
+        .wallet-balance { font-size: 28px; font-weight: bold; margin: 8px 0; text-align: center; color: #fff; }
+        .action-btns { display: flex; gap: 12px; margin-top: 10px; }
+        .action-btns button { flex: 1; padding: 12px; border-radius: 30px; border: none; font-size: 15px; font-weight: bold; color: #fff; cursor: pointer; }
+        .btn-withdraw { background: #f95959; } .btn-deposit { background: #00b973; }
+        .mode-tabs { display: flex; background: #222342; margin: 12px; border-radius: 12px; padding: 4px; gap: 4px; }
+        .mode-item { flex: 1; text-align: center; padding: 10px 0; font-size: 11px; color: #a2a4cb; border-radius: 10px; }
+        .mode-item.active { background: linear-gradient(180deg, #9176ff, #5c3eff); color: #fff; font-weight: bold; }
+        .game-display-box { background: linear-gradient(180deg, #322b6b, #1f1a4a); margin: 12px; padding: 15px; border-radius: 16px; border: 1px solid #3d3580; }
+        .meta-top { display: flex; justify-content: space-between; font-size: 13px; color: #a2a4cb; margin-bottom: 5px; }
+        .period-number { font-size: 15px; font-weight: bold; color: #fff; font-family: monospace; }
+        .timer-box { font-size: 24px; font-weight: bold; color: #ffa500; font-family: monospace; }
+        .active-bets-summary { background: #222342; margin: 12px; padding: 12px; border-radius: 10px; font-size: 12px; border-left: 4px solid #3ba0ff; }
+        .big-small-row { display: flex; gap: 10px; margin: 12px; }
+        .bs-btn { flex: 1; padding: 14px 0; border-radius: 12px; border: none; font-size: 16px; font-weight: bold; color: #fff; cursor: pointer; }
+        .btn-big { background: #ffa14a; } .btn-small { background: #6ca1ff; }
+        .color-row { display: flex; gap: 10px; margin: 12px; }
+        .col-btn { flex: 1; padding: 12px 0; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; color: #fff; cursor: pointer; }
+        .bg-green { background: #00b973; } .bg-violet { background: #b63eff; } .bg-red { background: #f95959; }
+        .balls-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 12px; background: #222342; padding: 12px; border-radius: 14px; }
+        .ball { aspect-ratio: 1; border-radius: 50%; border: none; font-size: 16px; font-weight: bold; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 -4px 6px rgba(0,0,0,0.4); }
+        .b-violet-red { background: linear-gradient(135deg, #b63eff 50%, #f95959 50%); }
+        .b-violet-green { background: linear-gradient(135deg, #b63eff 50%, #00b973 50%); }
+        .b-green { background: #00b973; } .b-red { background: #f95959; }
+        .history-tabs { display: flex; margin: 15px 12px 0 12px; background: #222342; border-radius: 10px 10px 0 0; overflow: hidden; }
+        .h-tab-item { flex: 1; text-align: center; padding: 12px 0; font-size: 13px; font-weight: bold; color: #a2a4cb; cursor: pointer; }
+        .h-tab-item.active { background: linear-gradient(90deg, #ff5274, #a252ff); color: #fff; }
+        .table-area { background: #222342; margin: 0 12px 12px 12px; border-radius: 0 0 12px 12px; overflow: hidden; display: none; }
+        .table-area.active { display: block; }
+        .jc-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; }
+        .jc-table th { background: #2e305c; color: #a2a4cb; padding: 10px; }
+        .jc-table td { padding: 12px 8px; border-bottom: 1px solid #2e305c; color: #fff; }
+        .dot-indicator { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+        .td-num { font-weight: bold; font-size: 15px; }
+        .text-green { color: #00b973; } .text-red { color: #f95959; }
+        .scandal-admin-panel { background: #261b35; margin: 12px; padding: 15px; border-radius: 16px; border: 2px dashed #ff5274; }
+        .admin-heading { color: #ff5274; font-size: 13px; font-weight: bold; margin-bottom: 8px; }
+        .admin-balls-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+        .admin-ctrl-ball { padding: 8px 0; border: 1px solid #3d3580; background: #1a1b2f; color: #fff; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .admin-ctrl-ball.locked { background: #ff5274; border-color: #fff; color: #000; box-shadow: 0 0 8px #ff5274; }
+        .modal-blur-bg { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: 0.3s; }
+        .modal-blur-bg.active { opacity: 1; pointer-events: auto; }
+        .popup-box { background: linear-gradient(135deg, #2b1f4d, #140f26); width: 85%; max-width: 330px; border-radius: 24px; padding: 25px; text-align: center; border: 2px solid #ffcc00; }
+        .pop-amt { font-size: 34px; font-weight: 900; color: #00b973; margin: 15px 0; }
+        .pop-close-btn { background: #ffcc00; color:#000; border:none; padding:12px; font-weight:bold; width:100%; border-radius:30px; cursor:pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo-box">JAI<span>♣️</span>CLUB</div>
+        <div>🎧</div>
+    </div>
+
+    <div class="wallet-card">
+        <div class="wallet-title">👛 Wallet balance</div>
+        <div class="wallet-balance">₹<span id="display-wallet">1000.00</span></div>
+        <div class="action-btns">
+            <button class="btn-withdraw" onclick="alert('Withdraw logic synced')">Withdraw</button>
+            <button class="btn-deposit" onclick="let a=prompt('Enter deposit cash:'); if(a){wallet+=Number(a); updateUI();}">Deposit</button>
+        </div>
+    </div>
+
+    <div class="mode-tabs">
+        <div class="mode-item">WinGo<br>30sec</div>
+        <div class="mode-item active">WinGo<br>1 Min</div>
+        <div class="mode-item">WinGo<br>3 Min</div>
+        <div class="mode-item">WinGo<br>5 Min</div>
+    </div>
+
+    <div class="game-display-box">
+        <div class="meta-top">
+            <div>
+                <div>WinGo 1 Min Period</div>
+                <div class="period-number" id="lbl-active-period">Syncing...</div>
+            </div>
+            <div style="text-align: right;">
+                <div>Time remaining</div>
+                <div class="timer-box" id="lbl-timer-clock">00:00</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="active-bets-summary">
+        <b>Current Active Bets:</b> <span id="lbl-active-bets">None</span>
+    </div>
+
+    <div class="big-small-row">
+        <button class="bs-btn btn-big" onclick="registerBet('Big')">Big</button>
+        <button class="bs-btn btn-small" onclick="registerBet('Small')">Small</button>
+    </div>
+
+    <div class="color-row">
+        <button class="col-btn bg-green" onclick="registerBet('Green')">Green</button>
+        <button class="col-btn bg-violet" onclick="registerBet('Violet')">Violet</button>
+        <button class="col-btn bg-red" onclick="registerBet('Red')">Red</button>
+    </div>
+
+    <div class="balls-grid">
+        <button class="ball b-violet-red" onclick="registerBet(0)">0</button>
+        <button class="ball b-green" onclick="registerBet(1)">1</button>
+        <button class="ball b-red" onclick="registerBet(2)">2</button>
+        <button class="ball b-green" onclick="registerBet(3)">3</button>
+        <button class="ball b-red" onclick="registerBet(4)">4</button>
+        <button class="ball b-violet-green" onclick="registerBet(5)">5</button>
+        <button class="ball b-red" onclick="registerBet(6)">6</button>
+        <button class="ball b-green" onclick="registerBet(7)">7</button>
+        <button class="ball b-red" onclick="registerBet(8)">8</button>
+        <button class="ball b-green" onclick="registerBet(9)">9</button>
+    </div>
+
+    <div class="history-tabs">
+        <div class="h-tab-item active" id="tab-btn-game" onclick="toggleTables('game')">Game history</div>
+        <div class="h-tab-item" id="tab-btn-my" onclick="toggleTables('my')">My history</div>
+    </div>
+
+    <div class="table-area active" id="table-box-game">
+        <table class="jc-table">
+            <thead>
+                <tr><th>Period</th><th>Number</th><th>Big Small</th><th>Color</th></tr>
+            </thead>
+            <tbody id="game-history-tbody"></tbody>
+        </table>
+    </div>
+
+    <div class="table-area" id="table-box-my">
+        <table class="jc-table">
+            <thead>
+                <tr><th>Period</th><th>Bet Targets</th><th>Total Amount</th><th>Result (Tax-Deducted)</th></tr>
+            </thead>
+            <tbody id="my-history-tbody">
+                <tr id="empty-log-row"><td colspan="4" style="color:#a2a4cb; padding:20px;">No records yet.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="scandal-admin-panel">
+        <div class="admin-heading"><span>🛡️ Server Admin Panel</span></div>
+        <div class="admin-balls-row">
+            <button class="admin-ctrl-ball" id="ab-0" onclick="setAdminForceNum(0)">0</button>
+            <button class="admin-ctrl-ball" id="ab-1" onclick="setAdminForceNum(1)">1</button>
+            <button class="admin-ctrl-ball" id="ab-2" onclick="setAdminForceNum(2)">2</button>
+            <button class="admin-ctrl-ball" id="ab-3" onclick="setAdminForceNum(3)">3</button>
+            <button class="admin-ctrl-ball" id="ab-4" onclick="setAdminForceNum(4)">4</button>
+            <button class="admin-ctrl-ball" id="ab-5" onclick="setAdminForceNum(5)">5</button>
+            <button class="admin-ctrl-ball" id="ab-6" onclick="setAdminForceNum(6)">6</button>
+            <button class="admin-ctrl-ball" id="ab-7" onclick="setAdminForceNum(7)">7</button>
+            <button class="admin-ctrl-ball" id="ab-8" onclick="setAdminForceNum(8)">8</button>
+            <button class="admin-ctrl-ball" id="ab-9" onclick="setAdminForceNum(9)">9</button>
+        </div>
+    </div>
+
+    <div class="modal-blur-bg" id="win-popup-wrapper">
+        <div class="popup-box">
+            <div style="font-size:50px;">🏆</div>
+            <div style="color:#ffcc00; font-size:22px; font-weight:900;">Congratulations</div>
+            <div id="lbl-pop-period" style="color:#a2a4cb; font-size:12px;">Period: --</div>
+            <div class="pop-amt" id="lbl-pop-cash">+₹0.00</div>
+            <button class="pop-close-btn" onclick="document.getElementById('win-popup-wrapper').classList.remove('active')">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ यहाँ अपनी RENDER वाली लाइव URL डालें 
+        const API_BASE_URL = "https://your-game-name.onrender.com"; 
+
+        let wallet = 1000.00;
+        let multiBetsArray = [];
+        let lastLoggedPeriod = "";
+
+        function updateUI() {
+            document.getElementById('display-wallet').innerText = wallet.toFixed(2);
+        }
+
+        function toggleTables(target) {
+            document.getElementById('tab-btn-game').classList.remove('active');
+            document.getElementById('tab-btn-my').classList.remove('active');
+            document.getElementById('table-box-game').classList.remove('active');
+            document.getElementById('table-box-my').classList.remove('active');
+            if(target === 'game') {
+                document.getElementById('tab-btn-game').classList.add('active');
+                document.getElementById('table-box-game').classList.add('active');
+            } else {
+                document.getElementById('tab-btn-my').classList.add('active');
+                document.getElementById('table-box-my').classList.add('active');
+            }
+        }
+
+        function registerBet(target) {
+            let betCash = prompt(`[Bet] Amount for ${target}:`, "10");
+            if(!betCash) return;
+            betCash = Number(betCash);
+            if(isNaN(betCash) || betCash <= 0 || betCash > wallet) return alert("Invalid or Low Balance!");
+
+            wallet -= betCash;
+            updateUI();
+
+            // Real casino rules: 2% service tax deducted
+            let effectiveAmount = betCash * 0.98;
+
+            multiBetsArray.push({ target: target, rawAmount: betCash, investedAmount: effectiveAmount });
+            document.getElementById('lbl-active-bets').innerText = multiBetsArray.map(b => `${b.target}(₹${b.rawAmount})`).join(", ");
+        }
+
+        async function setAdminForceNum(num) {
+            try {
+                let res = await fetch(`${API_BASE_URL}/api/admin-force`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ num: num })
+                });
+                let data = await res.json();
+                if(data.success) {
+                    document.querySelectorAll('.admin-ctrl-ball').forEach(b => b.classList.remove('locked'));
+                    document.getElementById(`ab-${num}`).classList.add('locked');
+                }
+            } catch(e) { console.log("Admin API Error"); }
+        }
+
+        // सर्वर से लाइव डेटा फेच करने का लूप (Every 1 Sec)
+        setInterval(async () => {
+            try {
+                let res = await fetch(`${API_BASE_URL}/api/game-state`);
+                let state = await res.json();
+
+                document.getElementById('lbl-timer-clock').innerText = `00:${String(state.timeRemaining).padStart(2, '0')}`;
+                document.getElementById('lbl-active-period').innerText = state.currentPeriod;
+
+                // गेम इतिहास रेंडर करना
+                let html = "";
+                state.gameHistory.forEach(row => {
+                    let cClass = row.winColor.includes("Green") ? "text-green" : "text-red";
+                    let dClass = row.winColor.includes("Green") ? "bg-green" : "bg-red";
+                    if(row.winNum===0 || row.winNum===5) dClass = "bg-violet";
+                    html += `<tr><td>${row.period}</td><td><span class="td-num ${cClass}">${row.winNum}</span></td><td>${row.winSize}</td><td><span class="dot-indicator ${dClass}"></span></td></tr>`;
+                });
+                document.getElementById('game-history-tbody').innerHTML = html;
+
+                // राउंड क्लोज होने पर रिज़ल्ट्स और "My History" कैलकुलेट करना
+                if(state.timeRemaining === 59 && lastLoggedPeriod !== state.currentPeriod) {
+                    let lastRoundResult = state.gameHistory[0];
+                    if(lastRoundResult && multiBetsArray.length > 0) {
+                        processMyRoundResults(lastRoundResult);
+                    }
+                    lastLoggedPeriod = state.currentPeriod;
+                    document.getElementById('lbl-active-bets').innerText = "None";
+                    document.querySelectorAll('.admin-ctrl-ball').forEach(b => b.classList.remove('locked'));
+                }
+            } catch(e) { console.log("Server sync waiting..."); }
+        }, 1000);
+
+        function processMyRoundResults(result) {
+            let totalInvested = 0, totalPayout = 0, targets = [];
+            
+            multiBetsArray.forEach(bet => {
+                totalInvested += bet.rawAmount;
+                targets.push(bet.target);
+                let isWin = false, multi = 2.0;
+
+                if(typeof bet.target === 'number' && bet.target === result.winNum) { isWin = true; multi = 9.0; }
+                else if(bet.target === "Violet" && (result.winNum === 0 || result.winNum === 5)) { isWin = true; multi = 4.5; }
+                else if((bet.target === "Green" || bet.target === "Red") && result.winColor.includes(bet.target)) {
+                    isWin = true; if(result.winNum === 0 || result.winNum === 5) multi = 1.5;
+                } else if(bet.target === result.winSize) { isWin = true; }
+
+                if(isWin) totalPayout += (bet.investedAmount * multi);
+            });
+
+            let tbody = document.getElementById('my-history-tbody');
+            let emp = document.getElementById('empty-log-row'); if(emp) emp.remove();
+
+            let row = document.createElement('tr');
+            let resText = totalPayout > 0 ? `<span class="text-green">Win (+₹${totalPayout.toFixed(2)})</span>` : `<span class="text-red">Loss (-₹${totalInvested})</span>`;
+            
+            if(totalPayout > 0) {
+                wallet += totalPayout; updateUI();
+                document.getElementById('lbl-pop-period').innerText = `Period: ${result.period}`;
+                document.getElementById('lbl-pop-cash').innerText = `+₹${totalPayout.toFixed(2)}`;
+                document.getElementById('win-popup-wrapper').classList.add('active');
+            }
+
+            row.innerHTML = `<td>${result.period.slice(-5)}</td><td>${targets.join(",")}</td><td>₹${totalInvested}</td><td>${resText}</td>`;
+            tbody.insertBefore(row, tbody.firstChild);
+            multiBetsArray = [];
+        }
+
+        updateUI();
+    </script>
+</body>
+          </html>
 
