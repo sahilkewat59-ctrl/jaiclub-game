@@ -76,6 +76,10 @@ app.post('/api/admin-force', (req, res) => {
     }
 });
 
+app.get('/', (req, res) => {
+    res.send('Server is Working!');
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
